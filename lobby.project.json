@@ -2,9 +2,7 @@
   "name": "Dokstival Lobby",
   "tree": {
     "$className": "DataModel",
-    "ReplicatedStorage": {
-      "Shared": { "$path": "src/shared" }
-    },
+    "ReplicatedStorage": { "Shared": { "$path": "src/shared" } },
     "ServerScriptService": {
       "Server": {
         "$className": "Folder",

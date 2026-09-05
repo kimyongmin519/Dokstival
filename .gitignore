@@ -1,8 +1,14 @@
-# Project place file
-/Dokstival.rbxlx
+# Generated place files
+/*.rbxlx
+/*.rbxl
 
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock
 
 sourcemap.json
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/

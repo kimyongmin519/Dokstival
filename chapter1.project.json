@@ -1,15 +1,13 @@
 {
-  "name": "Dokstival Lobby",
+  "name": "Dokstival Chapter 1",
   "tree": {
     "$className": "DataModel",
-    "ReplicatedStorage": {
-      "Shared": { "$path": "src/shared" }
-    },
+    "ReplicatedStorage": { "Shared": { "$path": "src/shared" } },
     "ServerScriptService": {
       "Server": {
         "$className": "Folder",
         "Common": { "$path": "src/server" },
-        "Lobby": { "$path": "src/places/lobby/server" }
+        "Chapter1": { "$path": "src/places/chapter1/server" }
       }
     },
     "StarterPlayer": {
@@ -17,7 +15,7 @@
         "Client": {
           "$className": "Folder",
           "Common": { "$path": "src/client" },
-          "Lobby": { "$path": "src/places/lobby/client" }
+          "Chapter1": { "$path": "src/places/chapter1/client" }
         }
       }
     }
