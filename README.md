@@ -98,10 +98,15 @@ queue at four and teleports the current group to a reserved Chapter 1 server.
 - The local player's head and Accessory parts are hidden only on that player's screen.
   `Torso`, arms, and legs remain visible; other players still see the full character.
 - Roblox's default `Humanoid` movement remains responsible for walking and jumping.
-  `FirstPersonCamera.client.luau` adds only light breathing, walking bob, sideways lean,
-  mouse-turn inertia, and a landing kick after the default camera updates.
+  `FirstPersonCamera.client.luau` adds only light breathing, vertical walking bob, sideways
+  lean, mouse-turn inertia, and a landing kick after the default camera updates. Walking
+  does not add repetitive side-to-side sway.
 - Effect strengths are constants at the top of that file. Tune those constants instead
   of changing the camera formulas.
+- `CAMERA_POSITION_OFFSET` controls the base viewpoint around the head. `X` moves
+  horizontally left/right, `Y` always moves down/up, and `Z` moves horizontally
+  backward/forward. Looking up or down does not tilt these position axes. Start with
+  small changes of `0.05` studs.
 
 ### Chapter 1 checkpoints
 

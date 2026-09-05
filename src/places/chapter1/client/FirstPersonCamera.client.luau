@@ -6,12 +6,14 @@ local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
+-- 머리 시점을 기준으로 한 카메라 위치입니다.
+-- X: 수평 좌우, Y: 항상 위아래, Z: 수평 앞뒤입니다. 음수 Z는 앞쪽입니다.
+local CAMERA_POSITION_OFFSET = Vector3.new(0, 0.2, -4)
+
 -- 카메라 효과 강도입니다. 모두 작게 유지해 멀미와 조작 방해를 줄입니다.
 local BREATH_HEIGHT = 0.018
 local BREATH_PITCH = math.rad(0.1)
-local WALK_SIDE = 0.025
 local WALK_HEIGHT = 0.022
-local WALK_ROLL = math.rad(0.16)
 local MAX_LEAN = math.rad(1.25)
 local MAX_ROTATION_INERTIA = math.rad(0.7)
 local LANDING_THRESHOLD = 20
@@ -34,7 +36,7 @@ local walkTime = 0
 local walkBlend = 0
 local lean = 0
 local rotationPitch = 0
-local rotationYaw = 0
+local rotationRoll = 0
 local landingOffset = 0
 local landingVelocity = 0
 local lowestVerticalVelocity = 0
@@ -76,7 +78,7 @@ local function resetMotion(): ()
 	walkBlend = 0
 	lean = 0
 	rotationPitch = 0
-	rotationYaw = 0
+	rotationRoll = 0
 	landingOffset = 0
 	landingVelocity = 0
 	lowestVerticalVelocity = 0
@@ -135,12 +137,13 @@ local function updateCamera(deltaTime: number): ()
 	local moveRight = currentHumanoid.MoveDirection:Dot(currentRoot.CFrame.RightVector)
 	lean = smooth(lean, -moveRight * MAX_LEAN, 8, dt)
 
-	-- 마우스를 빠르게 돌렸을 때 카메라가 아주 조금 늦게 따라오는 느낌만 더합니다.
+	-- 추가 Yaw는 이동 중 몸 회전과 충돌하므로 사용하지 않습니다.
+	-- 좌우 회전 관성은 이동 방향에 영향을 주지 않는 작은 Roll로 표현합니다.
 	local mouseDelta = UserInputService:GetMouseDelta()
 	local targetPitch = math.clamp(-mouseDelta.Y * 0.00045, -MAX_ROTATION_INERTIA, MAX_ROTATION_INERTIA)
-	local targetYaw = math.clamp(-mouseDelta.X * 0.00045, -MAX_ROTATION_INERTIA, MAX_ROTATION_INERTIA)
+	local targetRoll = math.clamp(mouseDelta.X * 0.00045, -MAX_ROTATION_INERTIA, MAX_ROTATION_INERTIA)
 	rotationPitch = smooth(rotationPitch, targetPitch, 12, dt)
-	rotationYaw = smooth(rotationYaw, targetYaw, 12, dt)
+	rotationRoll = smooth(rotationRoll, targetRoll, 12, dt)
 
 	if grounded then
 		if not wasGrounded then
@@ -164,14 +167,31 @@ local function updateCamera(deltaTime: number): ()
 
 	local breathY = math.sin(breathTime) * BREATH_HEIGHT
 	local breathPitch = math.cos(breathTime) * BREATH_PITCH
-	local walkX = math.sin(walkTime) * WALK_SIDE * walkBlend
 	local walkY = math.cos(walkTime * 2) * WALK_HEIGHT * walkBlend
-	local walkRoll = math.sin(walkTime) * WALK_ROLL * walkBlend
 
-	-- 기본 Roblox 카메라가 계산된 다음 작은 오프셋만 곱합니다.
-	local cameraOffset = CFrame.new(walkX, breathY + walkY + landingOffset, 0)
-		* CFrame.Angles(breathPitch + rotationPitch, rotationYaw, lean + walkRoll)
-	camera.CFrame *= cameraOffset
+	-- 카메라 Pitch를 위치축에 사용하면 아래를 볼 때 Z 이동도 아래로 기울어집니다.
+	-- 따라서 머리 시점의 수평 방향만 사용하고, Y는 월드 높이로 따로 더합니다.
+	local baseCamera = camera.CFrame
+	local horizontalForward = Vector3.new(baseCamera.LookVector.X, 0, baseCamera.LookVector.Z)
+	if horizontalForward.Magnitude < 0.001 then
+		local rootForward = currentRoot.CFrame.LookVector
+		horizontalForward = Vector3.new(rootForward.X, 0, rootForward.Z)
+	end
+	horizontalForward = horizontalForward.Unit
+	local horizontalRight = horizontalForward:Cross(Vector3.yAxis)
+	local basePositionOffset = horizontalRight * CAMERA_POSITION_OFFSET.X
+		+ Vector3.yAxis * CAMERA_POSITION_OFFSET.Y
+		- horizontalForward * CAMERA_POSITION_OFFSET.Z
+	local verticalMotion = Vector3.yAxis * (breathY + walkY + landingOffset)
+	local cameraRotation = baseCamera.Rotation
+	local effectRotation = CFrame.Angles(
+		breathPitch + rotationPitch,
+		0,
+		lean + rotationRoll
+	)
+	camera.CFrame = CFrame.new(baseCamera.Position + basePositionOffset + verticalMotion)
+		* cameraRotation
+		* effectRotation
 end
 
 player.CameraMode = Enum.CameraMode.LockFirstPerson
