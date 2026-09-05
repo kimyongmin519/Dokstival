@@ -14,7 +14,6 @@
       "StarterPlayerScripts": {
         "Client": {
           "$className": "Folder",
-          "Common": { "$path": "src/client" },
           "Lobby": { "$path": "src/places/lobby/client" }
         }
       }

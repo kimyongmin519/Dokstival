@@ -14,7 +14,6 @@
       "StarterPlayerScripts": {
         "Client": {
           "$className": "Folder",
-          "Common": { "$path": "src/client" },
           "Chapter1": { "$path": "src/places/chapter1/client" }
         }
       }

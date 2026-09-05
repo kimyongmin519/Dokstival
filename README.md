@@ -24,13 +24,12 @@ src/
     Remotes.luau           # Every Remote name plus server creation
   server/
     RemoteBootstrap.server.luau
-  client/
-    FirstPersonController.client.luau
   places/
     lobby/server/Lobby.server.luau
     lobby/client/QueueClient.luau
     chapter1/server/Chapter.server.luau
     chapter1/client/ChapterClient.luau
+    chapter1/client/FirstPersonCamera.client.luau
 ```
 
 - `lobby.project.json`: Lobby sync/build target
@@ -76,8 +75,6 @@ path/configuration validation artifact.
 
 - Enable `Workspace.StreamingEnabled` in both Places in Studio.
 - Keep the Experience player limit at 4.
-- Scripts lock the local player to first person. Final camera/UI behavior remains a
-  client presentation task.
 - The server creates `ReplicatedStorage.Remotes` and all declared remotes. Do not create
   duplicate RemoteEvents or RemoteFunctions in Studio.
 
@@ -93,6 +90,18 @@ No queue pad or UI design is assumed. A future Studio-authored interaction shoul
 
 The first queued player starts the configured 15-second countdown. The server caps the
 queue at four and teleports the current group to a reserved Chapter 1 server.
+
+### Chapter 1 camera
+
+- In Studio's Avatar Settings, set the avatar type to **R6**.
+- Chapter 1 locks the local player to first person. Lobby camera behavior is unchanged.
+- The local player's head and Accessory parts are hidden only on that player's screen.
+  `Torso`, arms, and legs remain visible; other players still see the full character.
+- Roblox's default `Humanoid` movement remains responsible for walking and jumping.
+  `FirstPersonCamera.client.luau` adds only light breathing, walking bob, sideways lean,
+  mouse-turn inertia, and a landing kick after the default camera updates.
+- Effect strengths are constants at the top of that file. Tune those constants instead
+  of changing the camera formulas.
 
 ### Chapter 1 checkpoints
 
@@ -126,6 +135,12 @@ no Studio-authored trigger.
 5. In Chapter 1, tag test parts as described above, touch one, reset the character, and
    verify the player respawns above the last touched checkpoint.
 6. Confirm malformed tagged instances warn without stopping the server.
+7. With an R6 avatar in Chapter 1, look down and confirm the torso, arms, and legs are
+   visible while the head and accessories do not block the camera.
+8. Stand still, walk, strafe, turn quickly, jump, and land. Confirm each camera effect is
+   light enough to aim comfortably, then reset once to confirm it reconnects on respawn.
+9. In a two-client test, confirm the other client still sees the complete head and
+   accessories. `LocalTransparencyModifier` must affect only its owning client.
 
 ### Published teleport test
 
