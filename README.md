@@ -19,14 +19,18 @@ omit `Workspace` and `Lighting`, so syncing code cannot replace the map.
 
 ```text
 src/
-  shared/                  # Shared config and network definitions
-  server/                  # Server code used by both Places
-  client/                  # Client code used by both Places
+  shared/
+    Config.luau            # Place IDs and gameplay settings
+    Remotes.luau           # Every Remote name plus server creation
+  server/
+    RemoteBootstrap.server.luau
+  client/
+    FirstPersonController.client.luau
   places/
-    lobby/server/          # Queue and teleport authority
-    lobby/client/          # Queue UI integration API
-    chapter1/server/       # Act/checkpoint/respawn authority
-    chapter1/client/       # Chapter presentation integration API
+    lobby/server/Lobby.server.luau
+    lobby/client/QueueClient.luau
+    chapter1/server/Chapter.server.luau
+    chapter1/client/ChapterClient.luau
 ```
 
 - `lobby.project.json`: Lobby sync/build target
@@ -105,9 +109,9 @@ character is moved four studs above that part. It is intentionally not written t
 DataStore and disappears when the server ends. Checkpoints may stream on clients; all
 registration and touch authority runs on the server.
 
-`ChapterStateService.setAct()` and `advance()` are server-only integration points for
-future objective/puzzle code. Act state never moves backward and currently has no
-Studio-authored trigger.
+`Chapter.server.luau` keeps `setAct()` and `advanceAct()` as local server-only integration
+points for future objective/puzzle code. Act state never moves backward and currently has
+no Studio-authored trigger.
 
 ## Testing
 
@@ -135,9 +139,10 @@ Studio-authored trigger.
 
 ## Current scope
 
-Implemented: code-only Place separation, centralized configuration/remotes, server-owned
-Lobby queue, guarded group teleport, first-person lock, Act state API, tagged checkpoint
-capture, and same-server respawn restoration.
+Implemented: code-only Place separation, one centralized Remote module, server-owned Lobby
+queue, guarded group teleport, first-person lock, Act state functions, tagged checkpoint
+capture, and same-server respawn restoration. Lobby and Chapter server flows each live in
+one main script so they can be read from top to bottom.
 
 Integration skeleton only: queue interaction/UI, objective-driven Act changes, production
 teleport retry UX, collection persistence, chapter completion persistence, puzzles,

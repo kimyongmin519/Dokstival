@@ -3,31 +3,35 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local NetworkTypes = require(Shared.NetworkTypes)
-local RemoteRegistry = require(Shared.Net.RemoteRegistry)
+local Remotes = require(Shared.Remotes)
 
-type QueueSnapshot = NetworkTypes.QueueSnapshot
+export type QueueSnapshot = {
+	PlayerUserIds: { number },
+	PlayerCount: number,
+	MaximumPlayers: number,
+	CountdownEndsAt: number?,
+}
 
 local QueueClient = {}
 
 function QueueClient.join(): ()
-	(RemoteRegistry.get("QueueJoin") :: RemoteEvent):FireServer()
+	(Remotes.get("QueueJoin") :: RemoteEvent):FireServer()
 end
 
 function QueueClient.leave(): ()
-	(RemoteRegistry.get("QueueLeave") :: RemoteEvent):FireServer()
+	(Remotes.get("QueueLeave") :: RemoteEvent):FireServer()
 end
 
 function QueueClient.getState(): QueueSnapshot
-	return (RemoteRegistry.get("GetQueueState") :: RemoteFunction):InvokeServer() :: QueueSnapshot
+	return (Remotes.get("GetQueueState") :: RemoteFunction):InvokeServer() :: QueueSnapshot
 end
 
 function QueueClient.onStateChanged(callback: (QueueSnapshot) -> ()): RBXScriptConnection
-	return (RemoteRegistry.get("QueueState") :: RemoteEvent).OnClientEvent:Connect(callback)
+	return (Remotes.get("QueueState") :: RemoteEvent).OnClientEvent:Connect(callback)
 end
 
 function QueueClient.onError(callback: (string) -> ()): RBXScriptConnection
-	return (RemoteRegistry.get("QueueError") :: RemoteEvent).OnClientEvent:Connect(callback)
+	return (Remotes.get("QueueError") :: RemoteEvent).OnClientEvent:Connect(callback)
 end
 
 return table.freeze(QueueClient)

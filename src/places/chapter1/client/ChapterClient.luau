@@ -3,19 +3,18 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local NetworkTypes = require(Shared.NetworkTypes)
-local RemoteRegistry = require(Shared.Net.RemoteRegistry)
+local Remotes = require(Shared.Remotes)
 
-type ChapterSnapshot = NetworkTypes.ChapterSnapshot
+export type ChapterSnapshot = { Act: number }
 
 local ChapterClient = {}
 
 function ChapterClient.getState(): ChapterSnapshot
-	return (RemoteRegistry.get("GetChapterState") :: RemoteFunction):InvokeServer() :: ChapterSnapshot
+	return (Remotes.get("GetChapterState") :: RemoteFunction):InvokeServer() :: ChapterSnapshot
 end
 
 function ChapterClient.onStateChanged(callback: (ChapterSnapshot) -> ()): RBXScriptConnection
-	return (RemoteRegistry.get("ChapterState") :: RemoteEvent).OnClientEvent:Connect(callback)
+	return (Remotes.get("ChapterState") :: RemoteEvent).OnClientEvent:Connect(callback)
 end
 
 return table.freeze(ChapterClient)
