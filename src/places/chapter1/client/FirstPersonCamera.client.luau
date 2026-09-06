@@ -8,12 +8,13 @@ local player = Players.LocalPlayer
 
 -- 머리 시점을 기준으로 한 카메라 위치입니다.
 -- X: 수평 좌우, Y: 항상 위아래, Z: 수평 앞뒤입니다. 음수 Z는 앞쪽입니다.
-local CAMERA_POSITION_OFFSET = Vector3.new(0, 0.2, -4)
+local CAMERA_POSITION_OFFSET = Vector3.new(0, 0.2, -1)
 
 -- 카메라 효과 강도입니다. 모두 작게 유지해 멀미와 조작 방해를 줄입니다.
 local BREATH_HEIGHT = 0.018
 local BREATH_PITCH = math.rad(0.1)
 local WALK_HEIGHT = 0.022
+local WALK_ROLL = math.rad(0.12)
 local MAX_LEAN = math.rad(1.25)
 local MAX_ROTATION_INERTIA = math.rad(0.7)
 local LANDING_THRESHOLD = 20
@@ -168,6 +169,7 @@ local function updateCamera(deltaTime: number): ()
 	local breathY = math.sin(breathTime) * BREATH_HEIGHT
 	local breathPitch = math.cos(breathTime) * BREATH_PITCH
 	local walkY = math.cos(walkTime * 2) * WALK_HEIGHT * walkBlend
+	local walkRoll = math.sin(walkTime) * WALK_ROLL * walkBlend
 
 	-- 카메라 Pitch를 위치축에 사용하면 아래를 볼 때 Z 이동도 아래로 기울어집니다.
 	-- 따라서 머리 시점의 수평 방향만 사용하고, Y는 월드 높이로 따로 더합니다.
@@ -187,7 +189,7 @@ local function updateCamera(deltaTime: number): ()
 	local effectRotation = CFrame.Angles(
 		breathPitch + rotationPitch,
 		0,
-		lean + rotationRoll
+		lean + walkRoll + rotationRoll
 	)
 	camera.CFrame = CFrame.new(baseCamera.Position + basePositionOffset + verticalMotion)
 		* cameraRotation

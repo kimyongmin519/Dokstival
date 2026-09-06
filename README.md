@@ -108,6 +108,16 @@ queue at four and teleports the current group to a reserved Chapter 1 server.
   backward/forward. Looking up or down does not tilt these position axes. Start with
   small changes of `0.05` studs.
 
+### Chapter 1 sprint
+
+- Hold `LeftShift` while moving to sprint. Stamina is consumed only while actually moving.
+- Edit the constants at the top of `SprintController.client.luau` to change walk/run speed,
+  acceleration/deceleration time, maximum stamina, drain, recovery, recovery delay, and
+  the minimum stamina needed after exhaustion.
+- The default R6 `Animate` script reacts to the increased Humanoid speed, so no custom
+  animation ID is required yet.
+- The bottom-center stamina line fades away when it is full and idle.
+
 ### Chapter 1 checkpoints
 
 Checkpoint parts remain Studio-owned. Each checkpoint must be a `BasePart` with:
@@ -146,6 +156,12 @@ no Studio-authored trigger.
    light enough to aim comfortably, then reset once to confirm it reconnects on respawn.
 9. In a two-client test, confirm the other client still sees the complete head and
    accessories. `LocalTransparencyModifier` must affect only its owning client.
+10. Hold `LeftShift` while moving and confirm speed takes about one second to reach its
+    maximum. Release Shift and confirm it smoothly returns to walking speed.
+11. Drain stamina to zero, confirm sprint stays disabled until the bar recovers past its
+    threshold, and verify stamina does not drain while standing still.
+12. Focus chat while holding Shift, switch window focus, die, and respawn. Confirm sprint
+    never remains stuck and the thin stamina line resets correctly.
 
 ### Published teleport test
 
